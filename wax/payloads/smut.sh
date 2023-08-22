@@ -1,5 +1,9 @@
 #!/bin/bash
 
+source /usr/sbin/sh1mmer_gui.sh
+
+cleanup
+
 get_largest_nvme_namespace() {
     # this function doesn't exist if the version is old enough, so we redefine it
     local largest size tmp_size dev
@@ -220,3 +224,5 @@ case $choice in
         echo "Invalid choice!"
         ;;
 esac
+
+setup
