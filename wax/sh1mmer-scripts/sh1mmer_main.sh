@@ -8,9 +8,9 @@ if [ -z $DST ]; then
 fi
 
 setup
-showbg Disclaimer.png
-sleep 1
-read -n 1
+# showbg Disclaimer.png
+# sleep 1
+# read -n 1
 showbg startingUp.png
 mount /dev/disk/by-label/arch /usr/local
 sleep 4

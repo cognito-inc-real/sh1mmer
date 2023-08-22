@@ -58,6 +58,16 @@ fi
 crossystem block_devmode=0
 vpd -i RW_VPD block_devmode=0
 
+read -p "Re-enable check_enrollment? [Y/n] > " check_enrollment
+case $check_enrollment in
+    [Yy]*)
+        vpd -i RW_VPD -s check_enrollment=1
+        ;;
+    *)
+        vpd -i RW_VPD -s check_enrollment=0
+        ;;
+esac
+
 
 echo "Probing for USB drive..."
 sync
