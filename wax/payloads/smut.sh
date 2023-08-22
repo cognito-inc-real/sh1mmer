@@ -1,6 +1,4 @@
-source /usr/local/payloads/gui_lib.sh
-allowtext
-clear
+#!/bin/bash
 
 get_largest_nvme_namespace() {
     # this function doesn't exist if the version is old enough, so we redefine it
@@ -42,7 +40,8 @@ opposite_num() {
 
 if crossystem wp_sw?1; then
     echo "WP not disabled - try on v105 with no battery"
-    return
+    read "Press enter to continue"
+    exit 0
 fi
 echo "Defogging..."
 vpd -i RW_VPD -s check_enrollment=0
@@ -58,17 +57,18 @@ fi
 crossystem block_devmode=0
 vpd -i RW_VPD block_devmode=0
 
+clear
 
 echo "Probing for USB drive..."
 sync
 fdisk -l
 
-echo "Enter your USB drive's device name from above (e.g. sda):"
+echo "Enter your USB drive's device name from above (e.g. /dev/sdb):"
 read -p " > " usbdev
 
 echo "Mounting USB drive..."
 mkdir -p /mnt/usb
-mount /dev/$usbdev /mnt/usb
+mount "$usbdev" /mnt/usb
 $files=$(ls /mnt/usb/*.bin)
 
 echo "Found files:"
@@ -79,10 +79,28 @@ sleep 3
 clear
 
 # ascii art logo
-echo "  _________.__    ____                                  \n /   _____/\|  \|__/_   \| _____   _____   ___________     \n \\_____  \\ \|  \|  \\\|   \|/     \\ /     \\_/ __ \\_  __ \\    \n /        \\\|   Y  \\   \|  Y Y  \\  Y Y  \\  ___/\|  \| \\/    \n/_______  /\|___\|  /___\|__\|_\|  /__\|_\|  /\\___  \>__\|       \n        \\/      \\/          \\/      \\/     \\/           \n   _____        .__   __  ._____.                  __   \n  /     \\  __ __\|  \|_/  \|_\|__\\_ \|__   ____   _____/  \|_ \n /  \\ /  \\\|  \|  \\  \|\\   __\\  \|\| __ \\ /  _ \\ /  _ \\   __\\\n/    Y    \\  \|  /  \|_\|  \| \|  \|\| \\_\\ \(  \<_\> \|  \<_\> \)  \|  \n\\____\|__  /____/\|____/__\| \|__\|\|___  /\\____/ \\____/\|__\|  \n        \\/                        \\/                    \n ____ ______________.__.__  .__  __                     \n\|    \|   \\__    ___/\|__\|  \| \|__\|/  \|_ ___.__.           \n\|    \|   / \|    \|   \|  \|  \| \|  \\   __\<   \|  \|           \n\|    \|  /  \|    \|   \|  \|  \|_\|  \|\|  \|  \\___  \|           \n\|______/   \|____\|   \|__\|____/__\|\|__\|  / ____\|           \n                                      \\/           \n                   or\n              S   M   U   T"
 
 cat << EOF
-
+  _________.__    ____                                  
+ /   _____/|  |__/_   | _____   _____   ___________     
+ \_____  \ |  |  \|   |/     \ /     \_/ __ \_  __ \    
+ /        \|   Y  \   |  Y Y  \  Y Y  \  ___/|  | \/    
+/_______  /|___|  /___|__|_|  /__|_|  /\___  >__|       
+        \/      \/          \/      \/     \/           
+   _____        .__   __  ._____.                  __   
+  /     \  __ __|  |_/  |_|__\_ |__   ____   _____/  |_ 
+ /  \ /  \|  |  \  |\   __\  || __ \ /  _ \ /  _ \   __\
+/    Y    \  |  /  |_|  | |  || \_\ (  <_> |  <_> )  |  
+\____|__  /____/|____/__| |__||___  /\____/ \____/|__|  
+        \/                        \/                    
+     ____ ______________.__.__  .__  __                     
+    |    |   \__    ___/|__|  | |__|/  |_ ___.__.           
+    |    |   / |    |   |  |  | |  \   __<   |  |           
+    |    |  /  |    |   |  |  |_|  ||  |  \___  |           
+    |______/   |____|   |__|____/__||__|  / ____|           
+                                          \/            
+                       or
+                   SMUT v1.2
 
 Select a utility to run:
  1) Install fakemurk/murkmod recovery image to unused partition
@@ -94,15 +112,10 @@ EOF
 
 read -p " > " choice
 
-choose_image() {
-    read -p " > " image
-    echo "$image"
-}
-
 install_fakemurk() {
     echo "Choose a recovery image:"
     echo $files
-    $image=$(choose_image)
+    read -p " > " image
     if [ -f "/mnt/usb/$image" ]; then
         echo "Finding target partitions..."
         local dst=/dev/$(get_largest_nvme_namespace)
@@ -207,5 +220,3 @@ case $choice in
         echo "Invalid choice!"
         ;;
 esac
-
-disallowtext
