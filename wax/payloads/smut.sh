@@ -63,6 +63,9 @@ vpd -i RW_VPD block_devmode=0
 
 clear
 
+echo "Insert your USB drive and press enter."
+read
+
 echo "Probing for USB drive..."
 sync
 fdisk -l
