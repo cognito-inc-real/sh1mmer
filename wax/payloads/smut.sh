@@ -63,25 +63,11 @@ vpd -i RW_VPD block_devmode=0
 
 clear
 
-echo "Insert your USB drive and press enter."
-read
-
-echo "Probing for USB drive..."
-sync
-fdisk -l
-
-echo "Enter your USB drive's device name from above (e.g. /dev/sdb):"
-read -p " > " usbdev
-
-echo "Mounting USB drive..."
-mkdir -p /mnt/usb
-echo "Assuming fat32 format - please, please, please god change me later once I figure out how to autodetect"
-mount -t fat32 "$usbdev" /mnt/usb
-
-echo "Found files:"
-ls /mnt/usb
-
-sleep 3
+echo "Found the following recovery images:"
+ls -lh /usr/share/smut-reco
+echo
+echo "Starting SMUT in 5 seconds..."
+sleep 5
 
 clear
 
@@ -121,17 +107,17 @@ read -p " > " choice
 
 install_fakemurk() {
     echo "Choose a recovery image:"
-    ls /mnt/usb
+    ls /usr/share/smut-reco
     read -p " > " image
-    if [ -f "/mnt/usb/$image" ]; then
+    if [ -f "/usr/share/smut-reco/$image" ]; then
         echo "Finding target partitions..."
         local dst=/dev/$(get_largest_nvme_namespace)
         local tgt_kern=$(opposite_num $(get_booted_kernnum))
         local tgt_root=$(( $tgt_kern + 1 ))
         echo "Targeting $tgt_kern and $tgt_root"
         local loop=$(losetup -f | tr -d '\r')
-        losetup -P "$loop" "/mnt/usb/$image"
-        printf "Overwriting partitions in 3 (this is your last chance to cancel)..."
+        losetup -P "$loop" "/usr/share/smut-reco/$image"
+        printf "Nuking partitions in 3 (this is your last chance to cancel)..."
         sleep 1
         printf "2..."
         sleep 1
@@ -161,19 +147,19 @@ install_fakemurk() {
 
 reco_from_bin() {
     echo "Choose a recovery image:"
-    ls /mnt/usb
+    ls /usr/share/smut-reco
     $image=$(choose_image)
-    if [ -f "/mnt/usb/$image" ]; then
+    if [ -f "/usr/share/smut-reco/$image" ]; then
         echo "Finding target partitions..."
         local dst=/dev/$(get_largest_nvme_namespace)
         local tgt_kern=$(opposite_num $(get_booted_kernnum))
         local tgt_root=$(( $tgt_kern + 1 ))
         local tgt_kern2=$(get_booted_kernnum)
         local tgt_root2=$(( $tgt_kern2 + 1 ))
-        echo "Targeting $tgt_kern and $tgt_root"
+        echo "Targeting $tgt_kern, $tgt_root, $tgt_kern2 and $tgt_root2"
         local loop=$(losetup -f | tr -d '\r')
-        losetup -P "$loop" "/mnt/usb/$image"
-        printf "Overwriting partitions in 3 (this is your last chance to cancel)..."
+        losetup -P "$loop" "/usr/share/smut-reco/$image"
+        printf "Nuking partitions in 3 (this is your last chance to cancel)..."
         sleep 1
         printf "2..."
         sleep 1

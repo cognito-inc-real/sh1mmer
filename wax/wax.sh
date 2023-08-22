@@ -31,6 +31,12 @@ else
     CHROMEBREW=chromebrew.tar.gz
 fi
 
+folder_size_kb=$(du -sk wax/smut-reco | awk '{print $1}')
+folder_size_gb=$((folder_size_kb / 1024 / 1024))
+
+# add smut payload size to chromebrew size
+CHROMEBREW_SIZE=$((CHROMEBREW_SIZE + folder_size_gb + 1))
+
 echo "Expanding bin for 'arch' partition. this will take a while"
 
 dd if=/dev/zero bs=1G status=progress count=${CHROMEBREW_SIZE} >>$bin
