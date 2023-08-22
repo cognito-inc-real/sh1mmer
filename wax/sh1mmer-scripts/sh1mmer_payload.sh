@@ -6,7 +6,7 @@ showbg terminalGeneric.png
 
 mapname() {
 	case $1 in # you can't use return because bash sux
-	'/usr/local/payloads/smut.sh') printf 'SMUT \(Sh1mmer Multiboot UTility\)' ;;
+	'/usr/local/payloads/smut.sh') printf 'SMUT (Sh1mmer Multiboot UTility)' ;;
 	'/usr/local/payloads/wifi.sh') printf 'Connect to wifi' ;;
 	'/usr/local/payloads/autoupdate.sh') printf 'Fetch updated payloads' ;;
 	'/usr/local/payloads/stopupdates.sh') printf 'Disable updates' ;;
