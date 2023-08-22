@@ -1,4 +1,6 @@
-#!/bin/bash
+source /usr/local/payloads/gui_lib.sh
+allowtext
+clear
 
 get_largest_nvme_namespace() {
     # this function doesn't exist if the version is old enough, so we redefine it
@@ -58,22 +60,16 @@ vpd -i RW_VPD block_devmode=0
 
 
 echo "Probing for USB drive..."
-for i in /dev/sd?; do
-    if [ -e "$i"1 ]; then
-        $usbdev=$i
-        echo "Found USB drive: $(cat /sys/block/$(basename $i)/device/model)"
-        read -p "Is this the correct device? [Y/n] " yn
-        case $yn in
-            [Nn]* ) continue;;
-            * ) break;;
-        esac
-    fi
-done
+sync
+fdisk -l
 
-echo "Mounting..."
-mkdir /mnt/usb
-mount $usbdev /mnt/usb
-$files=$(ls /mnt/usb)
+echo "Enter your USB drive's device name from above (e.g. sda):"
+read -p " > " usbdev
+
+echo "Mounting USB drive..."
+mkdir -p /mnt/usb
+mount /dev/$usbdev /mnt/usb
+$files=$(ls /mnt/usb/*.bin)
 
 echo "Found files:"
 echo $files
@@ -82,27 +78,10 @@ sleep 3
 
 clear
 
+# ascii art logo
+echo "  _________.__    ____                                  \n /   _____/\|  \|__/_   \| _____   _____   ___________     \n \\_____  \\ \|  \|  \\\|   \|/     \\ /     \\_/ __ \\_  __ \\    \n /        \\\|   Y  \\   \|  Y Y  \\  Y Y  \\  ___/\|  \| \\/    \n/_______  /\|___\|  /___\|__\|_\|  /__\|_\|  /\\___  \>__\|       \n        \\/      \\/          \\/      \\/     \\/           \n   _____        .__   __  ._____.                  __   \n  /     \\  __ __\|  \|_/  \|_\|__\\_ \|__   ____   _____/  \|_ \n /  \\ /  \\\|  \|  \\  \|\\   __\\  \|\| __ \\ /  _ \\ /  _ \\   __\\\n/    Y    \\  \|  /  \|_\|  \| \|  \|\| \\_\\ \(  \<_\> \|  \<_\> \)  \|  \n\\____\|__  /____/\|____/__\| \|__\|\|___  /\\____/ \\____/\|__\|  \n        \\/                        \\/                    \n ____ ______________.__.__  .__  __                     \n\|    \|   \\__    ___/\|__\|  \| \|__\|/  \|_ ___.__.           \n\|    \|   / \|    \|   \|  \|  \| \|  \\   __\<   \|  \|           \n\|    \|  /  \|    \|   \|  \|  \|_\|  \|\|  \|  \\___  \|           \n\|______/   \|____\|   \|__\|____/__\|\|__\|  / ____\|           \n                                      \\/           \n                   or\n              S   M   U   T"
+
 cat << EOF
-  _________.__    ____                                  
- /   _____/|  |__/_   | _____   _____   ___________     
- \_____  \ |  |  \|   |/     \ /     \_/ __ \_  __ \    
- /        \|   Y  \   |  Y Y  \  Y Y  \  ___/|  | \/    
-/_______  /|___|  /___|__|_|  /__|_|  /\___  >__|       
-        \/      \/          \/      \/     \/           
-   _____        .__   __  ._____.                  __   
-  /     \  __ __|  |_/  |_|__\_ |__   ____   _____/  |_ 
- /  \ /  \|  |  \  |\   __\  || __ \ /  _ \ /  _ \   __\
-/    Y    \  |  /  |_|  | |  || \_\ (  <_> |  <_> )  |  
-\____|__  /____/|____/__| |__||___  /\____/ \____/|__|  
-        \/                        \/                    
- ____ ______________.__.__  .__  __                     
-|    |   \__    ___/|__|  | |__|/  |_ ___.__.           
-|    |   / |    |   |  |  | |  \   __<   |  |           
-|    |  /  |    |   |  |  |_|  ||  |  \___  |           
-|______/   |____|   |__|____/__||__|  / ____|           
-                                      \/           
-                   or
-              S   M   U   T
 
 
 Select a utility to run:
@@ -229,3 +208,4 @@ case $choice in
         ;;
 esac
 
+disallowtext
