@@ -64,7 +64,7 @@ vpd -i RW_VPD block_devmode=0
 clear
 
 echo "Found the following recovery images:"
-ls -lh /usr/local/smut-reco # TODO: find correct path for smut payloads
+ls -lh /usr/local/smut-reco
 echo
 echo "Starting SMUT in 5 seconds..."
 sleep 5
