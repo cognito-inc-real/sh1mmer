@@ -35,7 +35,7 @@ folder_size_kb=$(du -sk smut-reco | awk '{print $1}')
 folder_size_gb=$((folder_size_kb / 1024 / 1024))
 
 # add smut payload size to chromebrew size
-CHROMEBREW_SIZE=$((CHROMEBREW_SIZE + folder_size_gb + 10))
+CHROMEBREW_SIZE=$((CHROMEBREW_SIZE + folder_size_gb + 1))
 
 echo "Expanding bin for 'arch' partition. this will take a while"
 
@@ -80,7 +80,8 @@ echo "Injecting payload"
 cp -rv sh1mmer-assets mnt/usr/share/sh1mmer-assets
 cp -v sh1mmer-scripts/* mnt/usr/sbin/
 cp -v factory_install.sh mnt/usr/sbin/
-cp -rv smut-reco mnt/usr/share/smut-reco
+mkdir -p mntarch/smut-reco
+cp -rv smut-reco mntarch/smut-reco/
 echo "Inserting firmware"
 curl "https://github.com/Netronome/linux-firmware/raw/master/iwlwifi-9000-pu-b0-jf-b0-41.ucode" >mnt/lib/firmware/iwlwifi-9000-pu-b0-jf-b0-41.ucode
 echo "Brewing /etc/profile"
