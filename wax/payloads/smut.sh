@@ -42,24 +42,27 @@ opposite_num() {
     fi
 }
 
-if crossystem wp_sw?1; then
-    echo "WP not disabled - try on v105 with no battery"
-    read "Press enter to continue"
-    exit 0
+defog() {
+    echo "Defogging..."
+    vpd -i RW_VPD -s block_devmode=0
+    crossystem block_devmode=0 > /dev/null
+    res=$(cryptohome --action=get_firmware_management_parameters 2>&1)
+    if [ $? -eq 0 ] && [[ ! $(echo $res | grep "Unknown action") ]]; then
+        tpm_manager_client take_ownership
+        # sleeps no longer needed
+        cryptohome --action=remove_firmware_management_parameters
+    fi
+    /usr/share/vboot/bin/set_gbb_flags.sh 0x8090
+    crossystem block_devmode=0
+    vpd -i RW_VPD block_devmode=0
+}
+
+# prompt user to defog if needed
+read -p "Defog? Requires battery removal (<v114)/WP pin to VCC on back of motherboard (>v114) [Y/n] " defog_choice
+if [ "$defog_choice" == "Y" ] || [ "$defog_choice" == "y" ] || [ "$defog_choice" == "" ]; then
+    vpd -i RW_VPD -s check_enrollment=0
+    defog
 fi
-echo "Defogging..."
-vpd -i RW_VPD -s check_enrollment=0
-vpd -i RW_VPD -s block_devmode=0
-crossystem block_devmode=0 > /dev/null
-res=$(cryptohome --action=get_firmware_management_parameters 2>&1)
-if [ $? -eq 0 ] && [[ ! $(echo $res | grep "Unknown action") ]]; then
-    tpm_manager_client take_ownership
-    # sleeps no longer needed
-    cryptohome --action=remove_firmware_management_parameters
-fi
-/usr/share/vboot/bin/set_gbb_flags.sh 0x8090
-crossystem block_devmode=0
-vpd -i RW_VPD block_devmode=0
 
 clear
 
@@ -133,12 +136,11 @@ install_fakemurk() {
         cgpt add "$dst" -i 2 -P 0
         cgpt add "$dst" -i "$tgt_kern" -P 1
         echo "Double-checking defog..."
-        /usr/share/vboot/bin/set_gbb_flags.sh 0x8090
-        crossystem block_devmode=0
-        vpd -i RW_VPD block_devmode=0
+        defog
         vpd -i RW_VPD -s check_enrollment=1 # for fakemurk this stays on
         echo "Done!"
-        read "Press enter to continue..."
+        read "Press enter to reboot into the new install..."
+        reboot
     else
         echo "File not found!"
         read "Press enter to continue..."
@@ -179,12 +181,11 @@ reco_from_bin() {
         cgpt add "$dst" -i 2 -P 0
         cgpt add "$dst" -i "$tgt_kern" -P 1
         echo "Double-checking defog..."
-        /usr/share/vboot/bin/set_gbb_flags.sh 0x8090
-        crossystem block_devmode=0
-        vpd -i RW_VPD block_devmode=0
+        defog
         vpd -i RW_VPD -s check_enrollment=0 # stays off here
         echo "Done!"
-        read "Press enter to continue..."
+        read "Press enter to reboot into the new install..."
+        reboot
     else
         echo "File not found!"
         read "Press enter to continue..."
