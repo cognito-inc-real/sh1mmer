@@ -7,7 +7,11 @@
 
 SMUT is a custom payload for sh1mmer that adds the ability to embed recovery images into your shims and use one shim (and therefore one sufficiently large drive) to hold all your recovery images for a specific board. Because the recovery stage is now also controlled by the script, SMUT also provides a bootstrap feature that can install a fakemurk-patched recovery image (make one yourself with `image_patcher.sh` on a fakemurked chromebook) directly to the system's storage without having to go through the process of unenrolling, recovering, and powerwashing multiple times to defog. Just unplug the battery, boot from the shim, select your file and wait for it to install.
 
-Now, back to the actual README...
+### Adding SMUT images to the shim
+
+Just create a new directory in /wax called `smut-reco` - place all the .bin files you've obtained for your target board there. I suggest you name them in a cohesive manner, as you'll have to select them manually later.
+
+#### Now, back to the actual README...
 
 Shady Hacking 1nstrument Makes Machine Enrollment Retreat
 
