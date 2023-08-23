@@ -21,7 +21,7 @@ get_largest_nvme_namespace() {
 }
 
 get_booted_kernnum() {
-    if (($(cgpt show -n "$dst" -i 2 -P) > \$(cgpt show -n "$dst" -i 4 -P))); then
+    if (($(cgpt show -n "$dst" -i 2 -P) > $(cgpt show -n "$dst" -i 4 -P))); then
         echo -n 2
     else
         echo -n 4
@@ -47,7 +47,7 @@ defog() {
     vpd -i RW_VPD -s block_devmode=0
     crossystem block_devmode=0 > /dev/null
     res=$(cryptohome --action=get_firmware_management_parameters 2>&1)
-    if [ $? -eq 0 ] && [[ ! $(echo $res | grep "Unknown action") ]]; then
+    if [ $? -eq 0 ] && [[ ! $(echo "$res" | grep "Unknown action") ]]; then
         tpm_manager_client take_ownership
         # sleeps no longer needed
         cryptohome --action=remove_firmware_management_parameters
@@ -58,7 +58,7 @@ defog() {
 }
 
 # prompt user to defog if needed
-read -p "Defog? Requires battery removal (<v114)/WP pin to VCC on back of motherboard (>v114) [Y/n] " defog_choice
+read -p "Defog? Requires battery removal (<v114)/WP pin to ground on back of motherboard (>v114) [Y/n] " defog_choice
 if [ "$defog_choice" == "Y" ] || [ "$defog_choice" == "y" ] || [ "$defog_choice" == "" ]; then
     vpd -i RW_VPD -s check_enrollment=0
     defog
@@ -85,7 +85,7 @@ cat << EOF
         \/      \/          \/      \/     \/           
    _____        .__   __  ._____.                  __   
   /     \  __ __|  |_/  |_|__\_ |__   ____   _____/  |_ 
- /  \ /  \|  |  \  |\   __\  || __ \ /  _ \ /  _ \   __\
+ /  \ /  \|  |  \  |\   __\  || __ \ /  _ \ /  _ \   __\\
 /    Y    \  |  /  |_|  | |  || \_\ (  <_> |  <_> )  |  
 \____|__  /____/|____/__| |__||___  /\____/ \____/|__|  
         \/                        \/                    
@@ -96,19 +96,21 @@ cat << EOF
     |______/   |____|   |__|____/__||__|  / ____|           
                                           \/            
                        or
-                   SMUT v1.2
+                   SMUT v1.3
 
 Select a utility to run:
  1) Install fakemurk/murkmod recovery image to unused partition
  2) Overwrite all partitions and flash recovery image
  3) Boot into recovery image/shim
- 4) Exit
+ 4) Display debug info
+ 5) Exit
 
 EOF
 
 read -p " > " choice
 
 install_fakemurk() {
+    # almost all of this was taken from fakemurk, thanks coolelectronics
     echo "Choose a recovery image:"
     ls /usr/local/smut-reco
     read -p " > " image
@@ -117,9 +119,13 @@ install_fakemurk() {
         local dst=/dev/$(get_largest_nvme_namespace)
         local tgt_kern=$(opposite_num $(get_booted_kernnum))
         local tgt_root=$(( $tgt_kern + 1 ))
-        echo "Targeting $tgt_kern and $tgt_root"
+        local kerndev=${dst}p${tgt_kern}
+        local rootdev=${dst}p${tgt_root}
+        echo "Targeting $kerndev and $rootdev"
         local loop=$(losetup -f | tr -d '\r')
         losetup -P "$loop" "/usr/local/smut-reco/$image"
+        echo "Press enter if nothing broke, otherwise press Ctrl+C"
+        read -r
         printf "Nuking partitions in 3 (this is your last chance to cancel)..."
         sleep 1
         printf "2..."
@@ -150,7 +156,7 @@ install_fakemurk() {
 reco_from_bin() {
     echo "Choose a recovery image:"
     ls /usr/local/smut-reco
-    $image=$(choose_image)
+    image=$(choose_image)
     if [ -f "/usr/local/smut-reco/$image" ]; then
         echo "Finding target partitions..."
         local dst=/dev/$(get_largest_nvme_namespace)
@@ -158,9 +164,15 @@ reco_from_bin() {
         local tgt_root=$(( $tgt_kern + 1 ))
         local tgt_kern2=$(get_booted_kernnum)
         local tgt_root2=$(( $tgt_kern2 + 1 ))
-        echo "Targeting $tgt_kern, $tgt_root, $tgt_kern2 and $tgt_root2"
+        local kerndev=${dst}p${tgt_kern}
+        local rootdev=${dst}p${tgt_root}
+        local kerndev2=${dst}p${tgt_kern2}
+        local rootdev2=${dst}p${tgt_root2}
+        echo "Targeting $kerndev, $rootdev, $kerndev2 and $rootdev2"
         local loop=$(losetup -f | tr -d '\r')
         losetup -P "$loop" "/usr/local/smut-reco/$image"
+        echo "Press enter if nothing broke, otherwise press Ctrl+C"
+        read -r
         printf "Nuking partitions in 3 (this is your last chance to cancel)..."
         sleep 1
         printf "2..."
@@ -193,6 +205,7 @@ reco_from_bin() {
 }
 
 boot_reco() {
+    # NOTE: will i have to hijack pid0 like with recomod? i sure as hell hope not - i wonder if a chroot will work?
     echo "Not implemented yet!"
     read "Press enter to continue..."
 }
@@ -208,8 +221,11 @@ case $choice in
         boot_reco
         ;;
     4)
-        echo "Bye!"
+        echo "Shimming hard or hardly shimming? Nobody knows anymore... (press enter to continue)" && read -r
         ;;
+    5) 
+    	echo "Bye!"
+    	;;
     *)
         echo "Invalid choice!"
         ;;
