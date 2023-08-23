@@ -31,7 +31,7 @@ else
     CHROMEBREW=chromebrew.tar.gz
 fi
 
-folder_size_kb=$(du -sk wax/smut-reco | awk '{print $1}')
+folder_size_kb=$(du -sk smut-reco | awk '{print $1}')
 folder_size_gb=$((folder_size_kb / 1024 / 1024))
 
 # add smut payload size to chromebrew size
