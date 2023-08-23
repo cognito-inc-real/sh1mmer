@@ -64,7 +64,7 @@ vpd -i RW_VPD block_devmode=0
 clear
 
 echo "Found the following recovery images:"
-ls -lh /usr/share/smut-reco # TODO: find correct path for smut payloads
+ls -lh /usr/local/smut-reco # TODO: find correct path for smut payloads
 echo
 echo "Starting SMUT in 5 seconds..."
 sleep 5
@@ -107,16 +107,16 @@ read -p " > " choice
 
 install_fakemurk() {
     echo "Choose a recovery image:"
-    ls /usr/share/smut-reco
+    ls /usr/local/smut-reco
     read -p " > " image
-    if [ -f "/usr/share/smut-reco/$image" ]; then
+    if [ -f "/usr/local/smut-reco/$image" ]; then
         echo "Finding target partitions..."
         local dst=/dev/$(get_largest_nvme_namespace)
         local tgt_kern=$(opposite_num $(get_booted_kernnum))
         local tgt_root=$(( $tgt_kern + 1 ))
         echo "Targeting $tgt_kern and $tgt_root"
         local loop=$(losetup -f | tr -d '\r')
-        losetup -P "$loop" "/usr/share/smut-reco/$image"
+        losetup -P "$loop" "/usr/local/smut-reco/$image"
         printf "Nuking partitions in 3 (this is your last chance to cancel)..."
         sleep 1
         printf "2..."
@@ -147,9 +147,9 @@ install_fakemurk() {
 
 reco_from_bin() {
     echo "Choose a recovery image:"
-    ls /usr/share/smut-reco
+    ls /usr/local/smut-reco
     $image=$(choose_image)
-    if [ -f "/usr/share/smut-reco/$image" ]; then
+    if [ -f "/usr/local/smut-reco/$image" ]; then
         echo "Finding target partitions..."
         local dst=/dev/$(get_largest_nvme_namespace)
         local tgt_kern=$(opposite_num $(get_booted_kernnum))
@@ -158,7 +158,7 @@ reco_from_bin() {
         local tgt_root2=$(( $tgt_kern2 + 1 ))
         echo "Targeting $tgt_kern, $tgt_root, $tgt_kern2 and $tgt_root2"
         local loop=$(losetup -f | tr -d '\r')
-        losetup -P "$loop" "/usr/share/smut-reco/$image"
+        losetup -P "$loop" "/usr/local/smut-reco/$image"
         printf "Nuking partitions in 3 (this is your last chance to cancel)..."
         sleep 1
         printf "2..."
