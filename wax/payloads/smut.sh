@@ -117,6 +117,14 @@ install_fakemurk() {
     if [ -f "/usr/local/smut-reco/$image" ]; then
         echo "Finding target partitions..."
         local dst=/dev/$(get_largest_nvme_namespace)
+        if [[ $dst == /dev/sd* ]]; then
+            echo "WARNING: get_largest_nvme_namespace returned $dst - this doesn't seem correct!"
+            echo "Press enter to view output from fdisk - find the correct drive and enter it below"
+            read -r
+            fdisk -l | more
+            echo "Enter the target drive to use:"
+            read dst
+        else
         local tgt_kern=$(opposite_num $(get_booted_kernnum))
         local tgt_root=$(( $tgt_kern + 1 ))
         local kerndev=${dst}p${tgt_kern}
@@ -160,6 +168,14 @@ reco_from_bin() {
     if [ -f "/usr/local/smut-reco/$image" ]; then
         echo "Finding target partitions..."
         local dst=/dev/$(get_largest_nvme_namespace)
+        if [[ $dst == /dev/sd* ]]; then
+            echo "WARNING: get_largest_nvme_namespace returned $dst - this doesn't seem correct!"
+            echo "Press enter to view output from fdisk - find the correct drive and enter it below"
+            read -r
+            fdisk -l | more
+            echo "Enter the target drive to use:"
+            read dst
+        else
         local tgt_kern=$(opposite_num $(get_booted_kernnum))
         local tgt_root=$(( $tgt_kern + 1 ))
         local tgt_kern2=$(get_booted_kernnum)
