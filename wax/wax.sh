@@ -81,7 +81,7 @@ cp -rv sh1mmer-assets mnt/usr/share/sh1mmer-assets
 cp -v sh1mmer-scripts/* mnt/usr/sbin/
 cp -v factory_install.sh mnt/usr/sbin/
 mkdir -p mntarch/smut-reco
-cp -rv smut-reco mntarch/smut-reco/
+cp -rv smut-reco/* mntarch/smut-reco/
 echo "Inserting firmware"
 curl "https://github.com/Netronome/linux-firmware/raw/master/iwlwifi-9000-pu-b0-jf-b0-41.ucode" >mnt/lib/firmware/iwlwifi-9000-pu-b0-jf-b0-41.ucode
 echo "Brewing /etc/profile"
