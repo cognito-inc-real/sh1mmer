@@ -11,6 +11,17 @@ SMUT is a custom payload for sh1mmer that adds the ability to embed recovery ima
 
 Just create a new directory in /wax called `smut-reco` - place all the .bin files you've obtained for your target board there. I suggest you name them in a cohesive manner, as you'll have to select them manually later.
 
+or...
+
+### Building automatically with Typewriter.sh
+
+To build automatically, just download a v105 recovery image and raw shim for your target board and rename them to `reco_image.bin` and `raw_shim.bin` respectively. Place these files in `/typewriter` and run the following commands:
+
+```sh
+cd typewriter
+sudo bash typewriter.sh
+```
+
 #### Now, back to the actual README...
 
 Shady Hacking 1nstrument Makes Machine Enrollment Retreat
