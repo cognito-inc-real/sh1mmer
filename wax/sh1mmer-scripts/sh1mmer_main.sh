@@ -13,7 +13,6 @@ setup
 # read -n 1
 showbg startingUp.png
 mount /dev/disk/by-label/arch /usr/local
-sleep 4
 
 loadmenu() {
 	case $selected in
