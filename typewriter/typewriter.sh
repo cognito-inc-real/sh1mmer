@@ -13,7 +13,7 @@ read -r
 echo "Copying reco image (this will take a while)..."
 cp ./reco_image.bin ./murkmod_image.bin
 
-echo "Patching murmod reco image..."
+echo "Patching murkmod reco image..."
 ./image_patcher.sh ./murkmod_image.bin
 
 echo "Moving reco images to smut-reco payloads folder..."
