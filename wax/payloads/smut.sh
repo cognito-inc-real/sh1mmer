@@ -124,7 +124,7 @@ install_fakemurk() {
             fdisk -l | more
             echo "Enter the target drive to use:"
             read dst
-        else
+        fi
         local tgt_kern=$(opposite_num $(get_booted_kernnum))
         local tgt_root=$(( $tgt_kern + 1 ))
         local kerndev=${dst}p${tgt_kern}
@@ -175,7 +175,7 @@ reco_from_bin() {
             fdisk -l | more
             echo "Enter the target drive to use:"
             read dst
-        else
+        fi
         local tgt_kern=$(opposite_num $(get_booted_kernnum))
         local tgt_root=$(( $tgt_kern + 1 ))
         local tgt_kern2=$(get_booted_kernnum)
