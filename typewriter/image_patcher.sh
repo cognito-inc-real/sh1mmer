@@ -55,14 +55,14 @@ EOF
 
 
 
-. ./lib/chromeos-common.sh || :
+. /usr/share/misc/chromeos-common.sh || :
 
 
 
 traps() {
     set -e
     trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
-    trap 'echo "\"${last_command}\" command failed with exit code $?."' EXIT
+    trap 'echo "\"${last_command}\" command failed with exit code $?. THIS IS A BUG, REPORT IT HERE https://github.com/MercuryWorkshop/fakemurk"' EXIT
 }
 leave() {
     trap - EXIT
@@ -75,8 +75,11 @@ csys() {
         crossystem "$@"
     elif test -f "$ROOT/usr/bin/crossystem.old"; then
         "$ROOT/usr/bin/crossystem.old" "$@"
-    else
+    elif test -f "$ROOT/usr/bin/crossystem"; then
         "$ROOT/usr/bin/crossystem" "$@"
+    else
+        echo "crossystem not found">&2
+        echo
     fi
 }
 
@@ -462,9 +465,9 @@ disable_autoupdates() {
 
     # we don't want to take ANY chances
     move_bin "$ROOT/usr/sbin/chromeos-firmwareupdate"
-    nullify_bin "$ROOT/usr/sbin/chromeos-firmwareupdate"S
+    nullify_bin "$ROOT/usr/sbin/chromeos-firmwareupdate"
 
-    # bye bye trollers!
+    # bye bye trollers! (trollers being cros devs)
     rm -rf "$ROOT/opt/google/cr50/firmware/" || :
 }
 
@@ -807,7 +810,22 @@ patch_root() {
     drop_image_patcher
 }
 
+# https://chromium.googlesource.com/chromiumos/docs/+/main/lsb-release.md
+lsbval() {
+  local key="$1"
+  local lsbfile="${2:-/etc/lsb-release}"
 
+  if ! echo "${key}" | grep -Eq '^[a-zA-Z0-9_]+$'; then
+    return 1
+  fi
+
+  sed -E -n -e \
+    "/^[[:space:]]*${key}[[:space:]]*=/{
+      s:^[^=]+=[[:space:]]*::
+      s:[[:space:]]+$::
+      p
+    }" "${lsbfile}"
+}
 
 get_asset() {
     curl -s -f "https://api.github.com/repos/rainestorme/murkmod/contents/$1" | jq -r ".content" | base64 -d
@@ -828,14 +846,23 @@ install() {
 
 murkmod_patch_root() {
     echo "Murkmod-ing root"
+    # check if lsb-release CHROMEOS_RELEASE_CHROME_MILESTONE is 118 for compat
+    local milestone=$(lsbval CHROMEOS_RELEASE_CHROME_MILESTONE $ROOT/etc/lsb-release)
+    if [ "$milestone" -eq "118" ]; then
+        echo "Detected v118, using new chromeos_startup"
+        move_bin "$ROOT/sbin/chromeos_startup"
+        install "chromeos_startup_v118.sh" $ROOT/sbin/chromeos_startup
+    else
+        install "chromeos_startup.sh" $ROOT/sbin/chromeos_startup.sh
+    fi
     install "fakemurk-daemon.sh" $ROOT/sbin/fakemurk-daemon.sh
-    install "chromeos_startup.sh" $ROOT/sbin/chromeos_startup.sh
     install "mush.sh" $ROOT/usr/bin/crosh
     install "pre-startup.conf" $ROOT/etc/init/pre-startup.conf
     install "cr50-update.conf" $ROOT/etc/init/cr50-update.conf
     install "ssd_util.sh" $ROOT/usr/share/vboot/bin/ssd_util.sh
     install "image_patcher.sh" $ROOT/sbin/image_patcher.sh
     chmod 777 $ROOT/sbin/fakemurk-daemon.sh $ROOT/sbin/chromeos_startup.sh $ROOT/usr/bin/crosh $ROOT/usr/share/vboot/bin/ssd_util.sh $ROOT/sbin/image_patcher.sh
+    chmod 755 $ROOT/sbin/chromeos_startup # whoops
 }
 
 main() {
@@ -845,11 +872,22 @@ main() {
   echo $SSD_UTIL
 
   if [ -z $1 ] || [ ! -f $1 ]; then
-    echo "\"$1\" isn't a real file, dipshit! You need to pass the path to the recovery image. You thought you were smart, huh? YOU THOUGHT YOU WERE FUCKING SMART, KIDDO? TRYING TO POKE AROUND INSIDE OF INTERNAL FILES. FUCKING IDIOT!"
+    echo "\"$1\" isn't a real file, dipshit! You need to pass the path to the recovery image."
     exit
   fi
-  local bin=$1
+  if [ -z $2 ]; then
+    echo "Not using a custom bootsplash."
+    local bootsplash="0"
+  elif [ ! -f $2 ]; then
+    echo "file $2 not found for custom bootsplash"
+    local bootsplash="0"
+  else
+    echo "Using custom bootsplash $2"
+    local bootsplash=$2
+  fi
 
+  local bin=$1
+  
   echo "Creating loop device..."
   local loop=$(losetup -f)
   losetup -P "$loop" "$bin"
@@ -869,6 +907,20 @@ main() {
   ROOT=/tmp/mnt
   patch_root
   murkmod_patch_root
+
+  if [ "$bootsplash" != "0" ]; then
+    echo "Adding custom bootsplash..."
+    for i in $(seq -f "%02g" 0 30); do
+      cp $bootsplash $ROOT/usr/share/chromeos-assets/images_100_percent/boot_splash_frame${i}.png
+    done
+  else
+    echo "Adding murkmod bootsplash..."
+    install "chromeos-bootsplash-v2.png" /tmp/bootsplash.png
+    for i in $(seq -f "%02g" 0 30); do
+      cp /tmp/bootsplash.png $ROOT/usr/share/chromeos-assets/images_100_percent/boot_splash_frame${i}.png
+    done
+    rm /tmp/bootsplash.png
+  fi
 
   sleep 2
   sync
