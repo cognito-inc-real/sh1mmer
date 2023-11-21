@@ -4,3 +4,7 @@ chromebrew-dev.tar.gz
 wax4web
 wax/smut-reco
 wax/*.bin
+__pycache__
+./log
+movie_payload.tar
+shimbin
