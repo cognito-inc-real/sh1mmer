@@ -1,6 +1,28 @@
 <div align="center">
     <h1>SH1MMER</h1>
+    <h4>+ the SMUT payload</h2>
 </div>
+
+## SMUT - the Sh1mmer Multiboot UTility
+
+SMUT is a custom payload for sh1mmer that adds the ability to embed recovery images into your shims and use one shim (and therefore one sufficiently large drive) to hold all your recovery images for a specific board. Because the recovery stage is now also controlled by the script, SMUT also provides a bootstrap feature that can install a fakemurk-patched recovery image (make one yourself with `image_patcher.sh` on a fakemurked chromebook) directly to the system's storage without having to go through the process of unenrolling, recovering, and powerwashing multiple times to defog. Just unplug the battery, boot from the shim, select your file and wait for it to install.
+
+### Adding SMUT images to the shim
+
+Just create a new directory in /wax called `smut-reco` - place all the .bin files you've obtained for your target board there. I suggest you name them in a cohesive manner, as you'll have to select them manually later.
+
+or...
+
+### Building automatically with Typewriter.sh
+
+To build automatically, just download a v105 recovery image and raw shim for your target board and rename them to `reco_image.bin` and `raw_shim.bin` respectively. Place these files in `/typewriter` and run the following commands:
+
+```sh
+cd typewriter
+sudo bash typewriter.sh
+```
+
+#### Now, back to the actual README...
 
 Shady Hacking 1nstrument Makes Machine Enrollment Retreat
 
