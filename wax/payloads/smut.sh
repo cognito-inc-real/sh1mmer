@@ -52,7 +52,7 @@ defog() {
         # sleeps no longer needed
         cryptohome --action=remove_firmware_management_parameters
     fi
-    /usr/share/vboot/bin/set_gbb_flags.sh 0x8090
+    /usr/share/vboot/bin/set_gbb_flags.sh 0x8091
     crossystem block_devmode=0
     vpd -i RW_VPD block_devmode=0
 }
