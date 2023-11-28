@@ -18,8 +18,8 @@ echo "Patching murkmod reco image..."
 
 echo "Moving reco images to smut-reco payloads folder..."
 mkdir -p ../wax/smut-reco
-mv ./murkmod_image.bin ../wax/smut-reco/murkmod_v105.bin
-mv ./reco_image.bin ../wax/smut-reco/recovery_v105.bin
+mv ./murkmod_image.bin ../wax/smut-reco/murkmod.bin
+mv ./reco_image.bin ../wax/smut-reco/recovery.bin
 
 echo "Moving shim to wax folder..."
 mv ./raw_shim.bin ../wax/raw_shim.bin
