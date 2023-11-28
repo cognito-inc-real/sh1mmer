@@ -55,7 +55,7 @@ EOF
 
 
 
-. /usr/share/misc/chromeos-common.sh || :
+. ./lib/chromeos-common.sh || :
 
 
 
